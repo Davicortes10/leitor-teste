@@ -177,12 +177,6 @@
 
         <img id="photoPreview" alt="Preview da foto">
 
-        <div class="buttons">
-            <button id="captureBtn" disabled>Capturar</button>
-            <button id="retryBtn">Tentar Novamente</button>
-            <button id="sendBtn" disabled style="display: none;">Enviar</button>
-        </div>
-
         <div class="loading">
             <div class="spinner"></div>
             <p>Processando imagem...</p>
@@ -201,9 +195,6 @@
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const photoPreview = document.getElementById('photoPreview');
-        const captureBtn = document.getElementById('captureBtn');
-        const retryBtn = document.getElementById('retryBtn');
-        const sendBtn = document.getElementById('sendBtn');
         const resultContainer = document.getElementById('resultContainer');
         const resultContent = document.getElementById('resultContent');
         const loading = document.querySelector('.loading');
@@ -222,7 +213,6 @@
                 });
                 video.srcObject = stream;
                 cameraMessage.style.display = 'none';
-                captureBtn.disabled = false;
             } catch (err) {
                 cameraMessage.textContent = 'Não foi possível acessar a câmera. Verifique as permissões.';
             }
@@ -240,25 +230,7 @@
             photoPreview.src = photoData;
             video.style.display = 'none';
             photoPreview.style.display = 'block';
-            captureBtn.style.display = 'none';
-            retryBtn.style.display = 'inline-block';
-            sendBtn.style.display = 'inline-block';
-            sendBtn.disabled = false;
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
-        }
-        
-        // Tentar novamente
-        function retry() {
-            photoPreview.style.display = 'none';
-            video.style.display = 'block';
-            captureBtn.style.display = 'inline-block';
-            retryBtn.style.display = 'none';
-            sendBtn.style.display = 'none';
-            resultContainer.style.display = 'none';
-            errorMessage.style.display = 'none';
-            initCamera();
+            sendPhoto();
         }
         
         // Enviar foto para a API
@@ -266,7 +238,6 @@
             if (!photoData) return;
             
             loading.style.display = 'block';
-            sendBtn.disabled = true;
             errorMessage.style.display = 'none';
             
             try {
@@ -290,10 +261,10 @@
                 errorMessage.style.display = 'block';
             } finally {
                 loading.style.display = 'none';
-                sendBtn.disabled = false;
             }
         }
         
+        // Converter Data URL para Blob
         function dataURLtoBlob(dataURL) {
             const arr = dataURL.split(',');
             const mime = arr[0].match(/:(.*?);/)[1];
@@ -305,6 +276,7 @@
             return new Blob([u8arr], { type: mime });
         }
 
+        // Exibir resultados
         function displayResult(data) {
             resultContent.innerHTML = '';
             addResultItem('ID', data.id);
@@ -321,6 +293,7 @@
             resultContainer.style.display = 'block';
         }
 
+        // Adicionar item ao resultado
         function addResultItem(label, value) {
             const div = document.createElement('div');
             div.className = 'result-item';
@@ -331,10 +304,18 @@
             resultContent.appendChild(div);
         }
 
-        captureBtn.addEventListener('click', capturePhoto);
-        retryBtn.addEventListener('click', retry);
-        sendBtn.addEventListener('click', sendPhoto);
-        window.addEventListener('DOMContentLoaded', initCamera);
+        // Iniciar captura contínua a cada 2 segundos
+        function startCaptureLoop() {
+            setInterval(() => {
+                capturePhoto();
+            }, 2000); // 2 segundos
+        }
+        
+        // Inicializar quando a página carregar
+        window.addEventListener('DOMContentLoaded', () => {
+            initCamera();
+            startCaptureLoop(); // Iniciar o loop de captura
+        });
     </script>
 </body>
 </html>
