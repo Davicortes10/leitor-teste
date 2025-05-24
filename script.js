@@ -64,7 +64,7 @@ async function sendPhoto() {
 
     try {
         console.log("Enviando foto para a API...");
-        const blob = dataURLtoBlob(photoData);
+        const blob = dataURLtoBlob(image.png);
         const formData = new FormData();
         formData.append('image', blob, 'image.png');
 
