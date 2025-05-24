@@ -66,7 +66,7 @@ async function sendPhoto() {
         console.log("Enviando foto para a API...");
         const blob = dataURLtoBlob(photoData);
         const formData = new FormData();
-        formData.append('image', blob, 'qrcode.jpg');
+        formData.append('image', blob, 'image.png');
 
         const response = await fetch('https://gerador-gabarito-leitor-qrcode.lh6c5d.easypanel.host/api/ler-qrcode/', {
             method: 'POST',
