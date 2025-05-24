@@ -16,9 +16,14 @@ async function initCamera() {
     try {
         console.log("Tentando acessar a câmera...");
         stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+            video: {
+                facingMode: { ideal: 'environment' },
+                width: { min: 640, ideal: 1280, max: 1920 },
+                height: { min: 480, ideal: 720, max: 1080 }
+            },
             audio: false
         });
+
         video.srcObject = stream;
         cameraMessage.style.display = 'none';
         console.log("Câmera inicializada com sucesso!");
