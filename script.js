@@ -14,13 +14,16 @@ let photoData = null;
 // Inicializar câmera
 async function initCamera() {
     try {
+        console.log("Tentando acessar a câmera...");
         stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
             audio: false
         });
         video.srcObject = stream;
         cameraMessage.style.display = 'none';
+        console.log("Câmera inicializada com sucesso!");
     } catch (err) {
+        console.error("Erro ao acessar a câmera:", err);
         cameraMessage.textContent = 'Não foi possível acessar a câmera. Verifique as permissões.';
     }
 }
@@ -29,25 +32,33 @@ async function initCamera() {
 function capturePhoto() {
     const width = video.videoWidth;
     const height = video.videoHeight;
+    console.log(`Capturando foto: largura=${width}, altura=${height}`);
+    
     canvas.width = width;
     canvas.height = height;
     const context = canvas.getContext('2d');
     context.drawImage(video, 0, 0, width, height);
     photoData = canvas.toDataURL('image/jpeg');
     photoPreview.src = photoData;
+    
     video.style.display = 'none';
     photoPreview.style.display = 'block';
+    
     sendPhoto();
 }
 
 // Enviar foto para a API
 async function sendPhoto() {
-    if (!photoData) return;
+    if (!photoData) {
+        console.error("Nenhuma foto capturada.");
+        return;
+    }
 
     loading.style.display = 'block';
     errorMessage.style.display = 'none';
 
     try {
+        console.log("Enviando foto para a API...");
         const blob = dataURLtoBlob(photoData);
         const formData = new FormData();
         formData.append('image', blob, 'qrcode.jpg');
@@ -64,6 +75,7 @@ async function sendPhoto() {
         const data = await response.json();
         displayResult(data);
     } catch (err) {
+        console.error("Erro ao processar a imagem:", err);
         errorMessage.textContent = 'Erro ao processar a imagem. Tente novamente.';
         errorMessage.style.display = 'block';
     } finally {
@@ -113,6 +125,7 @@ function addResultItem(label, value) {
 
 // Iniciar captura contínua a cada 2 segundos
 function startCaptureLoop() {
+    console.log("Iniciando captura contínua...");
     setInterval(() => {
         capturePhoto();
     }, 2000); // 2 segundos
@@ -120,6 +133,7 @@ function startCaptureLoop() {
 
 // Inicializar quando a página carregar
 window.addEventListener('DOMContentLoaded', () => {
+    console.log("Página carregada, inicializando câmera...");
     initCamera();
     startCaptureLoop(); // Iniciar o loop de captura
 });
