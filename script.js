@@ -64,7 +64,7 @@ async function sendPhoto() {
 
     try {
         console.log("Enviando foto para a API...");
-        const blob = dataURLtoBlob(image.png);
+        const blob = dataURLtoBlob(photoData);
         const formData = new FormData();
         formData.append('image', blob, 'image.png');
 
@@ -135,6 +135,44 @@ function startCaptureLoop() {
         capturePhoto();
     }, 2000); // 2 segundos
 }
+
+async function uploadImage() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert('Selecione uma imagem primeiro.');
+        return;
+    }
+
+    loading.style.display = 'block';
+    errorMessage.style.display = 'none';
+
+    try {
+        const formData = new FormData();
+        formData.append('image', file, file.name);
+
+        console.log("Enviando imagem para a API...");
+        const response = await fetch('https://gerador-gabarito-leitor-qrcode.lh6c5d.easypanel.host/api/ler-qrcode/', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erro na API: ${response.status}`);
+        }
+
+        const data = await response.json();
+        displayResult(data);
+    } catch (err) {
+        console.error("Erro ao enviar a imagem:", err);
+        errorMessage.textContent = 'Erro ao processar a imagem. Tente novamente.';
+        errorMessage.style.display = 'block';
+    } finally {
+        loading.style.display = 'none';
+    }
+}
+
 
 // Inicializar quando a página carregar
 window.addEventListener('DOMContentLoaded', () => {
